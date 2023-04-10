@@ -17,7 +17,7 @@ class Rectangle:
         return False
 
 
-def main():
+def bf():
     n = int(input())
     rect_array = []
     for i in range(n):
@@ -34,4 +34,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    bf()

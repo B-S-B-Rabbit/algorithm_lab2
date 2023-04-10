@@ -1,6 +1,16 @@
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right, bisect
 from pprint import pprint
 
+
+def lower_bound(arr, target, i, j):
+    while i < j:
+        mid = i + (j - i) / 2
+        mid = int(mid)
+        if target > arr[mid]:
+            i = mid + 1
+        else:
+            j = mid
+    return mid
 
 class Point2D:
     def __init__(self, x=0, y=0):
@@ -15,11 +25,6 @@ class Rectangle:
         self.x2 = x2
         self.y2 = y2
 
-    def have(self, point):
-        if self.x1 <= point.x <= self.x2 and self.y1 <= point.y <= self.y2:
-            return True
-        return False
-
 
 def main():
     n = int(input())
@@ -31,29 +36,31 @@ def main():
         x_values.add(rect.x2)
         y_values.add(rect.y1)
         y_values.add(rect.y2)
+        x_values.add(rect.x2 + 1)
+        y_values.add(rect.y2 + 1)
 
     x_values = sorted(x_values)
     y_values = sorted(y_values)
     matrix = [[0 for _ in range(len(x_values))] for _ in range(len(y_values))]
-
-    # Заполняем матрицу значениями для каждого прямоугольника
     for rect in rectangles:
-        i1 = x_values.index(rect.x1)
-        j1 = y_values.index(rect.y1)
-        i2 = x_values.index(rect.x2)
-        j2 = y_values.index(rect.y2)
+        i1 = bisect_left(x_values, rect.x1)
+        j1 = bisect_left(y_values, rect.y1)
+        i2 = bisect_left(x_values, rect.x2)
+        j2 = bisect_left(y_values, rect.y2)
         for i in range(i1, i2 + 1):
             for j in range(j1, j2 + 1):
                 matrix[j][i] += 1
-        pprint(matrix)
+
     m = int(input())
     for i in range(m):
         point = Point2D(*map(int, input().split()))
-        x_index = bisect_left(x_values, point.x)
-        y_index = bisect_left(y_values, point.y)
-
-        print(matrix[y_index][x_index] if x_index < len(x_values) and y_index < len(y_values) else 0,end=' ')
-
+        if point.x < x_values[0] or point.y < y_values[0]:
+            print(0)
+            continue
+        x_index = lower_bound(x_values, point.x,0,len(x_values))
+        y_index = lower_bound(y_values, point.y,0,len(y_values))
+        count = matrix[y_index][x_index] if 0 <= x_index < len(x_values) and 0 <= y_index < len(y_values) else 0
+        print(count, end=' ')
 
 if __name__ == "__main__":
     main()
