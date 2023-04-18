@@ -2,15 +2,11 @@ from bisect import bisect_left, bisect_right, bisect
 from pprint import pprint
 
 
-def lower_bound(arr, target, i, j):
-    while i < j:
-        mid = i + (j - i) / 2
-        mid = int(mid)
-        if target > arr[mid]:
-            i = mid + 1
-        else:
-            j = mid
-    return mid
+def find_le(a, x):
+    'Находит крайнее правое значение меньше или равно x'
+    i = bisect_right(a, x)
+    if i:
+        return i-1
 
 class Point2D:
     def __init__(self, x=0, y=0):
@@ -50,15 +46,19 @@ def main():
         for i in range(i1, i2 + 1):
             for j in range(j1, j2 + 1):
                 matrix[j][i] += 1
-
+    print()
+    for i in matrix:
+        for j in i:
+            print(j, end=' ')
+        print()
     m = int(input())
     for i in range(m):
         point = Point2D(*map(int, input().split()))
         if point.x < x_values[0] or point.y < y_values[0]:
             print(0)
             continue
-        x_index = lower_bound(x_values, point.x,0,len(x_values))
-        y_index = lower_bound(y_values, point.y,0,len(y_values))
+        x_index = find_le(x_values, point.x)
+        y_index = find_le(y_values, point.y)
         count = matrix[y_index][x_index] if 0 <= x_index < len(x_values) and 0 <= y_index < len(y_values) else 0
         print(count, end=' ')
 
