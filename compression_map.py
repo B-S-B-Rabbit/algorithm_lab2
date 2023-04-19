@@ -46,11 +46,6 @@ def main():
         for i in range(i1, i2 + 1):
             for j in range(j1, j2 + 1):
                 matrix[j][i] += 1
-    print()
-    for i in matrix:
-        for j in i:
-            print(j, end=' ')
-        print()
     m = int(input())
     for i in range(m):
         point = Point2D(*map(int, input().split()))
