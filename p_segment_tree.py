@@ -1,5 +1,4 @@
-import copy
-from bisect import bisect_left, bisect_right
+from bisect import bisect_right
 
 
 def find_le(a, x):
@@ -7,11 +6,22 @@ def find_le(a, x):
     i = bisect_right(a, x)
     if i:
         return i - 1
+
+
 def find_vale(a, x):
     'Находит крайнее правое значение меньше или равно x'
     i = bisect_right(a, x)
     if i:
         return a[i - 1]
+
+
+def findNextPowerOf2(n):
+    k = 1
+    while k < n:
+        k = k << 1
+
+    return k
+
 
 def count_rect(root, y_ind):
     count = 0
@@ -75,12 +85,6 @@ class SegmentTree:
         new_root.right_child = self.update(root.right_child, start, end, value)
         return new_root
 
-    def print_tree(self, root, level=0):
-        if root is not None:
-            self.print_tree(root.right_child, level + 1)
-            print(' ' * 6 * level + '->', [root.list_val, root.modifier])
-            self.print_tree(root.left_child, level + 1)
-
 
 class Point2D:
     def __init__(self, x=0, y=0):
@@ -94,13 +98,6 @@ class Rectangle:
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-
-
-def compress_values(values):
-    values = list(set(values))
-    values.sort()
-    compressed = {v: i for i, v in enumerate(values)}
-    return compressed
 
 
 class Event:
@@ -129,24 +126,21 @@ def main():
 
     x_values = sorted(x_values)
     y_values = sorted(y_values)
-    events = {}
+    events = []
     for i in rectangles:
-        events[find_le(x_values, i.x1)] = (
+        events.append(
             Event(find_le(x_values, i.x1), find_le(y_values, i.y1), find_le(y_values, i.y2), True))
-        events[find_le(x_values, i.x2 + 1)] = (
+        events.append(
             Event(find_le(x_values, i.x2 + 1), find_le(y_values, i.y1), find_le(y_values, i.y2), False))
 
-    events = dict(sorted(events.items(), key=lambda x: x[0]))
-    #print(events)
+    events = sorted(events, key=lambda x: x.compX)
     stree = SegmentTree(y_values)
-    stree.roots[-1] = stree.build(0, 15)
+
+    stree.roots[-1] = stree.build(0, findNextPowerOf2(len(y_values)) - 1)
     prev_event = -1
-    for event in events.values():
-        #print(event.compX, event.compY1, event.compY2, prev_event)
+    for event in events:
         stree.roots[event.compX] = stree.update(stree.roots[prev_event], event.compY1, event.compY2,
                                                 1 if event.status_open else -1)
-        #stree.print_tree(stree.roots[events[event.compX].compX])
-        #print('\n\n\n\n')
         prev_event = event.compX
 
     m = int(input())
@@ -157,14 +151,12 @@ def main():
             continue
         x_index = find_le(x_values, point.x)
         y_index = find_le(y_values, point.y)
-        print(find_vale(list(stree.roots.keys()), x_index))
         count = count_rect(stree.roots[find_vale(list(stree.roots.keys()), x_index)], y_index)
-        print(f'from {x_index} and {y_index} zipped_c with x:{point.x} and y:{point.y} we have {count}')
-        #print(count, end=' ')
+        print(count, end=' ')
+
 
 if __name__ == "__main__":
     main()
-#todo разобраться с множеством начал на одной точке, и концов тоже(проблема в updates, которые постоянно заменяют. Нужна не замена, если одинаково, а дополения.
 # 10
 # 0 0 2 2
 # 0 0 1 1
