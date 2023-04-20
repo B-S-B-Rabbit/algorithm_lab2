@@ -1,4 +1,5 @@
 from bisect import bisect_right
+import typing
 
 
 def find_le(a, x):
@@ -15,7 +16,7 @@ def find_vale(a, x):
         return a[i - 1]
 
 
-def findNextPowerOf2(n):
+def find_next_power_of2(n):
     k = 1
     while k < n:
         k = k << 1
@@ -111,9 +112,7 @@ class Event:
         return f'{self.compX}'
 
 
-def main():
-    n = int(input())
-    rectangles = [Rectangle(*(map(int, input().split()))) for _ in range(n)]
+def fill_zipped_coord(rectangles: list) -> (set, set):
     x_values = set()
     y_values = set()
     for rect in rectangles:
@@ -126,33 +125,54 @@ def main():
 
     x_values = sorted(x_values)
     y_values = sorted(y_values)
+    return x_values, y_values
+
+
+def fill_events(rectangles, x_values, y_values):
     events = []
-    for i in rectangles:
+    for rect in rectangles:
         events.append(
-            Event(find_le(x_values, i.x1), find_le(y_values, i.y1), find_le(y_values, i.y2), True))
+            Event(find_le(x_values, rect.x1), find_le(y_values, rect.y1), find_le(y_values, rect.y2), True))
         events.append(
-            Event(find_le(x_values, i.x2 + 1), find_le(y_values, i.y1), find_le(y_values, i.y2), False))
-
+            Event(find_le(x_values, rect.x2 + 1), find_le(y_values, rect.y1), find_le(y_values, rect.y2), False))
     events = sorted(events, key=lambda x: x.compX)
-    stree = SegmentTree(y_values)
+    return events
 
-    stree.roots[-1] = stree.build(0, findNextPowerOf2(len(y_values)) - 1)
+
+def get_count(points, x_values, y_values, stree):
+    counts = []
+    for point in points:
+        if point.x < x_values[0] or point.y < y_values[0]:
+            counts.append(0)
+            continue
+        x_index = find_le(x_values, point.x)
+        y_index = find_le(y_values, point.y)
+        count = count_rect(stree.roots[find_vale(list(stree.roots.keys()), x_index)], y_index)
+        counts.append(count)
+    return counts
+
+
+def main():
+    n = int(input())
+    rectangles = [Rectangle(*(map(int, input().split()))) for _ in range(n)]
+
+    m = int(input())
+    points = [Point2D(*map(int, input().split())) for _ in range(m)]
+
+    x_values, y_values = fill_zipped_coord(rectangles)
+    events = fill_events(rectangles, x_values, y_values)
+
+    stree = SegmentTree(y_values)
+    stree.roots[-1] = stree.build(0, find_next_power_of2(len(y_values)) - 1)
     prev_event = -1
+
     for event in events:
         stree.roots[event.compX] = stree.update(stree.roots[prev_event], event.compY1, event.compY2,
                                                 1 if event.status_open else -1)
         prev_event = event.compX
 
-    m = int(input())
-    for i in range(m):
-        point = Point2D(*map(int, input().split()))
-        if point.x < x_values[0] or point.y < y_values[0]:
-            print(0)
-            continue
-        x_index = find_le(x_values, point.x)
-        y_index = find_le(y_values, point.y)
-        count = count_rect(stree.roots[find_vale(list(stree.roots.keys()), x_index)], y_index)
-        print(count, end=' ')
+    counts = get_count(points, x_values, y_values, stree)
+    return counts
 
 
 if __name__ == "__main__":
@@ -168,5 +188,65 @@ if __name__ == "__main__":
 # 5 4 9 10
 # 8 2 12 12
 # 5 2 9 6
-# 20
+# 60
 # 0 0
+# 0 1
+# 0 2
+# 0 4
+# 0 3
+# 0 7
+# 0 10
+# 1 1
+# 1 5
+# 1 3
+# 2 2
+# 2 3
+# 3 3
+# 3 4
+# 3 5
+# 3 6
+# 3 7
+# 3 8
+# 3 9
+# 3 12
+# 4 2
+# 4 4
+# 4 8
+# 4 6
+# 4 20
+# 20 20
+# 5 12
+# 5 2
+# 5 4
+# 5 5
+# 6 7
+# 6 2
+# 6 4
+# 5 9
+# 6 14
+# 7 2
+# 7 90
+# 7 0
+# 7 5
+# 8 2
+# 8 5
+# 8 7
+# 9 2
+# 9 6
+# 9 10
+# 9 12
+# 10 1
+# 10 0
+# 10 10
+# 10 5
+# 10 4
+# 11 2
+# 11 0
+# 12 6
+# 14 0
+# 12 12
+# 12 0
+# 13 2
+# 16 7
+# 11 12
+# 3 3 2 1 1 1 2 3 1 1 3 2 2 1 1 1 1 2 1 0 2 2 2 2 0 0 0 3 4 4 2 3 4 2 0 2 0 1 3 3 4 2 3 4 3 1 1 1 1 2 2 2 1 1 0 1 0 0 0 1
