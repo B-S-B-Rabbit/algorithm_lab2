@@ -12,8 +12,8 @@ class SegmentTree:
         def __init__(self, start, end):
             self.start = start  # начало интервала
             self.end = end  # конец интервала
-            self.list_val = 0  # сумма элементов на данном интервале
-            self.modifier = 0
+            self.list_val = 0 # значение листа
+            self.modifier = 0 # модификатор узла
             self.left_child = None  # левый потомок
             self.right_child = None  # правый потомок
 
@@ -31,10 +31,10 @@ class SegmentTree:
         return node
 
     def update(self, root, start, end, value):
-        if start > root.end or end < root.start:  # если наш диапазон не пересекается с текущим узлом
+        if start > root.end or end < root.start:
             return root
 
-        if start <= root.start and end >= root.end:  # обновление всего диапазона
+        if start <= root.start and end >= root.end:
             new_root = self.Node(root.start, root.end)
             new_root.left_child = root.left_child
             new_root.right_child = root.right_child

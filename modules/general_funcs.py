@@ -23,7 +23,7 @@ def find_next_power_of2(n):
     return k
 
 
-def fill_zipped_coord(rectangles: list) -> (set, set):
+def fill_zipped_coord(rectangles):
     x_values = set()
     y_values = set()
     for rect in rectangles:
